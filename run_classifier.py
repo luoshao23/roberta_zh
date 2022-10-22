@@ -961,21 +961,23 @@ def main(_):
     output_predict_file = os.path.join(FLAGS.output_dir, "test_results.tsv")
     output_predict_show_file = os.path.join(FLAGS.output_dir, "test_results_for_show.tsv")
     slines = processor._read_tsv(FLAGS.data_dir)
+    print("len(slines)", len(slines))
     swriter = tf.gfile.GFile(output_predict_show_file, "w")
     with tf.gfile.GFile(output_predict_file, "w") as writer:
       num_written_lines = 0
       tf.logging.info("***** Predict results *****")
       for (i, prediction) in enumerate(result):
         probabilities = prediction["probabilities"]
-        li = label_list[np.argmax(probabilities)]
-        output_line_show = "%s#%s\n" % ("\t".join(slines[i]), li)
-        tf.logging.info(output_line_show)
+
         if i >= num_actual_predict_examples:
           break
         output_line = "\t".join(
             str(class_probability)
             for class_probability in probabilities) + "\n"
         writer.write(output_line)
+        li = label_list[np.argmax(probabilities)]
+        output_line_show = "%s#%s\n" % ("\t".join(slines[i]), li)
+        tf.logging.info(output_line_show)
         swriter.write(output_line_show)
         num_written_lines += 1
     assert num_written_lines == num_actual_predict_examples
